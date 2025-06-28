@@ -11,6 +11,7 @@ urlpatterns = [
     path('usuarios/editar/<int:id>/', views.editar_usuario, name='editar_usuario'),
     path('usuarios/eliminar/<int:id>/', views.eliminar_usuario, name='eliminar_usuario'),
     path('pokedex/', views.pokedex, name='pokedex'),
+    path('audio-player/', views.audio_player, name='audio_player'),
 
 
 

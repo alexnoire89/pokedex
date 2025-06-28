@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% load static %}
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -256,11 +258,21 @@
     </style>
 </head>
 <body>
+        <audio id="audio" loop>
+        <source src="{% static 'audio/pokemon_song.mp3' %}" type="audio/mpeg">
+             Tu navegador no soporta audio HTML5.
+        </audio>
     <nav>
+        
         <div class="logo">
             <a href="/pokedex/" style="color:white; font-weight:bold; font-size:1.2em;">Mi Pokédex</a>
         </div>
+        
+
         <div class="links">
+            <button id="btn-audio-toggle" style="background:none; border:none; color:white; cursor:pointer; font-weight:bold;">
+            🔈 Música OFF
+            </button>
             <a href="/inicio/">Inicio</a>
             {% if request.session.usuario_rol == 'admin' %}
                 <a href="/usuarios/">Usuarios</a>
@@ -274,4 +286,28 @@
         {% block contenido %}{% endblock %}
     </main>
 </body>
+
+<script>
+  const audio = document.getElementById('audio');
+  const btn = document.getElementById('btn-audio-toggle');
+
+  audio.volume = 0.1;
+
+  let isPlaying = false;
+
+  btn.addEventListener('click', () => {
+    if (isPlaying) {
+      audio.pause();
+      btn.textContent = '🔈 Música OFF';
+      isPlaying = false;
+    } else {
+      audio.play().catch(() => {
+        alert('Por favor, interactúa con la página para reproducir el audio.');
+      });
+      btn.textContent = '🔊 Música ON';
+      isPlaying = true;
+    }
+  });
+</script>
+
 </html>

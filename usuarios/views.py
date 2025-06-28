@@ -6,27 +6,28 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 
 
-
+def audio_player(request):
+    return render(request, 'audio_player.html')
 
 #FUNCION PARA VERIFICAR SI EL USUARIO ES ADMIN
-# Esta funcion se utiliza para verificar si el usuario logueado es un administrador.
 def usuario_es_admin(request):
     return request.session.get('usuario_rol') == 'admin'
 
 
 #LISTAR USUARIOS
-# Esta vista lista todos los usuarios registrados en la base de datos.
 def listar_usuarios(request):
-    if not usuario_es_admin(request):
-        messages.error(request, 'No tenes permiso para ver esta seccion.')
+    rol = request.session.get('usuario_rol')
+    if rol not in ['admin', 'editor']:
+        messages.error(request, 'No tenés permiso para ver esta sección.')
         return redirect('inicio')
 
     usuarios = Usuario.objects.all()
-    return render(request, 'listar_usuarios.html', {'usuarios': usuarios})
-
+    return render(request, 'listar_usuarios.html', {
+        'usuarios': usuarios,
+        'rol': rol  #pasamos el rol al template para ocultar botones
+    })
 
 #CREAR USUARIO
-# Esta vista permite a los administradores crear nuevos usuarios.
 def crear_usuario(request):
     if not usuario_es_admin(request):
         messages.error(request, 'No tenés permiso para acceder.')
@@ -62,11 +63,13 @@ def crear_usuario(request):
 
 
 #EDITAR USUARIO
-# Esta vista permite a los administradores editar la información de un usuario existente.
 def editar_usuario(request, id):
-    if not usuario_es_admin(request):
-        messages.error(request, 'No tenes permiso para acceder.')
-        return redirect('inicio')
+    if 'usuario_id' not in request.session:
+        messages.error(request, 'Tenés que iniciar sesión.')
+        return redirect('login_usuario')
+
+    usuario_logueado = Usuario.objects.get(id=request.session['usuario_id'])
+    rol_logueado = request.session.get('usuario_rol')
 
     try:
         usuario = Usuario.objects.get(id=id)
@@ -74,16 +77,25 @@ def editar_usuario(request, id):
         messages.error(request, 'Usuario no encontrado.')
         return redirect('listar_usuarios')
 
+    #editor NO puede editar un usuario admin
+    if rol_logueado == 'editor' and usuario.rol == 'admin':
+        messages.error(request, 'No tenés permiso para editar a un administrador.')
+        return redirect('listar_usuarios')
+
+    #viewer ni otro sin rol editan
+    if rol_logueado not in ['admin', 'editor']:
+        messages.error(request, 'No tenés permiso para acceder.')
+        return redirect('inicio')
+
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         email = request.POST.get('email')
-        rol = request.POST.get('rol')
+        nuevo_rol = request.POST.get('rol')
         password = request.POST.get('password')
         confirmar = request.POST.get('confirmar')
 
-        # Validaciones
         if email != usuario.email and Usuario.objects.filter(email=email).exists():
-            messages.error(request, 'El email ya esta registrado a otro usuario.')
+            messages.error(request, 'El email ya está registrado a otro usuario.')
             return render(request, 'editar_usuario.html', {'usuario': usuario})
 
         if password:
@@ -95,17 +107,21 @@ def editar_usuario(request, id):
 
         usuario.nombre = nombre
         usuario.email = email
-        usuario.rol = rol
-        usuario.save()
 
+        #solo el admin puede cambiar el rol
+        if rol_logueado == 'admin':
+            usuario.rol = nuevo_rol
+
+        usuario.save()
         messages.success(request, 'Usuario actualizado correctamente.')
         return redirect('listar_usuarios')
 
     return render(request, 'editar_usuario.html', {'usuario': usuario})
 
 
+
+
 #ELIMINAR USUARIO
-# Esta vista permite a los administradores eliminar un usuario existente.
 def eliminar_usuario(request, id):
     if not usuario_es_admin(request):
         messages.error(request, 'No tenés permiso para acceder.')
@@ -127,7 +143,6 @@ def eliminar_usuario(request, id):
 
 
 #OBJETO DE SESION
-# Esta vista guarda el rol del usuario en la sesion de manera protegida.
 def inicio(request):
     if 'usuario_id' not in request.session:
         return redirect('login_usuario')  
@@ -142,14 +157,12 @@ def inicio(request):
 
 
 #LOGOUT DE USUARIO
-# Esta vista maneja el cierre de sesion de los usuarios.
 def logout_usuario(request):
     request.session.flush()  
     return redirect('login_usuario')
 
 
 #LOGIN DE USUARIO
-# Esta vista maneja el inicio de sesion de los usuarios.
 def login_usuario(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -174,7 +187,6 @@ def login_usuario(request):
 
 
 #REGISTRO DE USUARIO
-# Esta vista maneja el registro de nuevos usuarios.
 def registrar_usuario(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
@@ -190,7 +202,7 @@ def registrar_usuario(request):
             messages.error(request, 'Ese email ya esta registrado.')
             return render(request, 'registrar.html')
 
-        #Hashear contraseña antes de guardar
+        #Hashear contrasena antes de guardar
         hashed_password = make_password(password)
 
         usuario = Usuario(nombre=nombre, email=email, password=hashed_password)
@@ -203,7 +215,6 @@ def registrar_usuario(request):
 
 
 #POKEDEX
-# Esta vista renderiza la página principal de la Pokedex, asegurando que el usuario esté logueado.
 def pokedex(request):
     if 'usuario_id' not in request.session:
         return redirect('login_usuario') 

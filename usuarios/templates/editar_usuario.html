@@ -8,43 +8,47 @@
     .success-message { color: green; }
 </style>
 
-    <h1>Editar usuario</h1>
-                <li class="{% if message.tags and message.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ message }}</li>
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li class="{% if message.tags and message.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+<h1>Editar usuario</h1>
 
-    <form method="POST">
-        {% csrf_token %}
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li class="{% if message.tags and message.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
 
-        <label>Nombre:</label><br>
-        <input type="text" name="nombre" value="{{ usuario.nombre }}" required><br><br>
+<form method="POST">
+    {% csrf_token %}
 
-        <label>Email:</label><br>
-        <input type="email" name="email" value="{{ usuario.email }}" required><br><br>
+    <label>Nombre:</label><br>
+    <input type="text" name="nombre" value="{{ usuario.nombre }}" required><br><br>
 
+    <label>Email:</label><br>
+    <input type="email" name="email" value="{{ usuario.email }}" required><br><br>
+
+    {% if request.session.usuario_rol == 'admin' %}
         <label>Rol:</label><br>
         <select name="rol" required>
             <option value="viewer" {% if usuario.rol == 'viewer' %}selected{% endif %}>Viewer</option>
             <option value="editor" {% if usuario.rol == 'editor' %}selected{% endif %}>Editor</option>
             <option value="admin" {% if usuario.rol == 'admin' %}selected{% endif %}>Admin</option>
         </select><br><br>
+    {% else %}
+        <p><strong>Rol:</strong> {{ usuario.rol|capfirst }}</p>
+        <input type="hidden" name="rol" value="{{ usuario.rol }}">
+    {% endif %}
 
-        <label>Nueva contraseña (dejar vacío para no cambiar):</label><br>
-        <input type="password" name="password"><br><br>
+    <label>Nueva contraseña (dejar vacío para no cambiar):</label><br>
+    <input type="password" name="password"><br><br>
 
-        <label>Confirmar nueva contraseña:</label><br>
-        <input type="password" name="confirmar"><br><br>
+    <label>Confirmar nueva contraseña:</label><br>
+    <input type="password" name="confirmar"><br><br>
 
-        <button type="submit">Guardar cambios</button>
-    </form>
+    <button type="submit">Guardar cambios</button>
+</form>
 
-    <br>
-    <a href="/usuarios/" class="btn">Volver a la lista de usuarios</a>
+<br>
+<a href="/usuarios/" class="btn">Volver a la lista de usuarios</a>
 
 {% endblock %}
-

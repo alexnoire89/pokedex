@@ -34,26 +34,45 @@
         user-select: none;
     }
     .pokemon {
-        background-color: #ffffffcc;
-        border: 3px solid #ef5350;
+        background: linear-gradient(135deg, #fefefe, #e0e0e0);
+        border: 5px solid #f44336; 
         border-radius: 15px;
-        padding: 15px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        padding: 20px;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.6);
+        max-width: 280px;
+        margin: 20px auto;
+        font-family: 'Pokemon Solid', Arial, sans-serif;
+        color: #222;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
         transition: transform 0.3s ease;
-        max-width: 400px;
-        margin: 0 auto;
     }
     .pokemon:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        transform: scale(1.07);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.8);
+    }
+    .pokemon::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(244,67,54,0.3), transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
     }
     .pokemon-name {
-        font-weight: bold;
-        font-size: 1.5em;
-        color: #1e88e5;
-        margin-bottom: 10px;
-        text-align: center;
-        text-shadow: 1px 1px #ef5350;
+        font-size: 2em;
+        font-weight: 900;
+        color: #3b4cca; 
+        text-shadow:
+            -1px -1px 0 #fff,
+            1px 1px 0 #000,
+            0 0 5px #3b4cca;
+        margin-bottom: 15px;
+        text-transform: capitalize;
     }
     .pokemon-type {
         font-style: italic;
@@ -80,23 +99,40 @@
         border-color: #ef5350;
     }
     .pokemon img {
-        width: 120px;
-        height: 120px;
+        width: 150px;
+        height: 150px;
+        border: 4px solid #fff;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(59,76,202,0.7);
+        background-color: white;
+        margin: 0 auto 15px auto;
         display: block;
-        margin: 0 auto 10px auto;
     }
     .tipo {
         display: inline-block;
-        background-color: #eee;
-        border-radius: 4px;
-        padding: 2px 8px;
-        margin: 2px;
-        font-size: 0.8em;
+        background-color: #ef5350;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9em;
+        padding: 5px 12px;
+        margin: 3px 5px;
+        border-radius: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        text-transform: capitalize;
     }
     .habilidad {
-        font-size: 0.8em;
+        font-size: 0.85em;
         color: #555;
-        text-align: center;
+        margin: 10px 0 15px 0;
+        font-style: italic;
+    }
+        .pokemon p {
+        font-size: 0.95em;
+        line-height: 1.4em;
+        color: #222;
+        padding: 0 10px;
+        text-align: justify;
+        text-shadow: 0 0 1px rgba(255,255,255,0.7);
     }
 </style>
 
@@ -107,7 +143,7 @@
 
 <script>
     let offset = 0;       
-    const limit = 20;     //Cuantos cargar por vez
+    const limit = 20;     //cuantos cargar por vez
     const lista = document.getElementById('listaPokemons');
     const cargaMensaje = document.getElementById('cargaMensaje');
     let cargando = false; //doOnce para evitar multiples cargas
@@ -120,7 +156,7 @@
         //if (cargaMensaje) cargaMensaje.style.display = 'none';
 
         try {
-            //traer el total de pokémon
+            //traer el total de pokes
             if (totalPokemons === null) {
                 const responseCount = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=1`);
                 const dataCount = await responseCount.json();
@@ -136,19 +172,31 @@
                 const detalleResponse = await fetch(poke.url);
                 const detalle = await detalleResponse.json();
 
+                //a veces species falla
+                if (!detalle.species || !detalle.species.url) {
+                    throw new Error('No se encontró la URL de especie para ' + detalle.name);
+                }
+
+                const especieResponse = await fetch(detalle.species.url);
+                const especieData = await especieResponse.json();
+
+                //crear la tarjeta visual
                 const divPoke = document.createElement('div');
                 divPoke.className = 'pokemon';
 
+                //nombre
                 const nombre = document.createElement('h3');
                 nombre.className = 'pokemon-name';
                 nombre.textContent = detalle.name.charAt(0).toUpperCase() + detalle.name.slice(1);
                 divPoke.appendChild(nombre);
 
+                //imagen
                 const img = document.createElement('img');
                 img.src = detalle.sprites.front_default || '';
                 img.alt = detalle.name;
                 divPoke.appendChild(img);
 
+                //tipos
                 const tipos = document.createElement('div');
                 detalle.types.forEach(t => {
                     const tipoSpan = document.createElement('span');
@@ -158,10 +206,20 @@
                 });
                 divPoke.appendChild(tipos);
 
+                //habilidades
                 const habilidades = document.createElement('div');
                 habilidades.className = 'habilidad';
                 habilidades.textContent = 'Habilidades: ' + detalle.abilities.map(a => a.ability.name).join(', ');
                 divPoke.appendChild(habilidades);
+
+                //descripcion
+                const flavor = especieData.flavor_text_entries.find(entry => entry.language.name === 'es');
+                const descripcion = document.createElement('p');
+                descripcion.style.fontSize = '0.85em';
+                descripcion.style.marginTop = '10px';
+                descripcion.style.textAlign = 'center';
+                descripcion.textContent = flavor ? flavor.flavor_text.replace(/\n|\f/g, ' ') : 'Descripción no disponible.';
+                divPoke.appendChild(descripcion);
 
                 lista.appendChild(divPoke);
             }
@@ -175,7 +233,7 @@
         }
     }
 
-    //detectar cuando llegamos casi al final de la página para cargar más
+    //detectar cuando llegamos casi al final de la pagina para cargar mas
     window.addEventListener('scroll', () => {
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
             if (totalPokemons === null || offset < totalPokemons) {
