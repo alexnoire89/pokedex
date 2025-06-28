@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block titulo %}Mi Pokédex{% endblock %}</title>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fceabb, #f8b500);
+            color: #333;
+            margin: 20px;
+        }
+        h1 {
+            color: #ef5350;
+            text-align: center;
+            text-shadow: 2px 2px #f8b500;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 10px 8px;
+            padding: 10px 20px;
+            background: #ef5350;
+            color: white;
+            border: 2px solid #f8b500;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #f8b500;
+            color: #ef5350;
+            border-color: #ef5350;
+        }
+
+        .contenedor {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #ffffffdd;
+            border: 3px solid #ef5350;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+
+        }        
+        
+        #listaPokemons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto 40px auto;
+        }
+        #cargaMensaje {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #ef5350;
+            text-shadow: 1px 1px #f8b500;
+            margin-bottom: 20px;
+            user-select: none;
+        }
+        .pokemon {
+            background-color: #ffffffcc;
+            border: 3px solid #ef5350;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .pokemon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        .pokemon-name {
+            font-weight: bold;
+            font-size: 1.5em;
+            color: #1e88e5;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 1px 1px #ef5350;
+        }
+        .pokemon-type {
+            font-style: italic;
+            color: #ef6c00;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .btn-pokeball {
+            background: #ef5350;
+            border: 2px solid #f8b500;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 15px auto;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            transition: background 0.3s ease;
+        }
+        .btn-pokeball:hover {
+            background: #f8b500;
+            color: #ef5350;
+            border-color: #ef5350;
+        }
+        .pokemon img {
+            width: 120px;
+            height: 120px;
+            display: block;
+            margin: 0 auto 10px auto;
+        }
+        .tipo {
+            display: inline-block;
+            background-color: #eee;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin: 2px;
+            font-size: 0.8em;
+        }
+        .habilidad {
+            font-size: 0.8em;
+            color: #555;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #ef5350;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #f8b500; 
+        }
+
+        .logo a {
+            font-size: 1.4em;
+            text-shadow: 1px 1px #333;
+        }
+
+        .links {
+            display: flex;
+            align-items: center;
+        }
+
+        form {
+            background-color: #ffffffcc;
+            border: 2px solid #ef5350;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 300px;
+            margin: 0 auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        form label {
+            font-weight: bold;
+            color: #ef5350;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        form input[type="email"],
+        form input[type="text"],
+        form input[type="password"] {
+            width: 90%;
+            padding: 10px;
+            border: 2px solid #f8b500;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        form button {
+            background-color: #ef5350;
+            color: white;
+            border: 2px solid #f8b500;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: #f8b500;
+            color: #ef5350;
+            border-color: #ef5350;
+        }
+
+        form a {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            color: #1e88e5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        form a:hover {
+            text-decoration: underline;
+            color: #0d47a1;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+        
+        #cargaMensaje {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #ef5350;
+            text-shadow: 1px 1px #f8b500;
+            margin-bottom: 20px;
+            user-select: none;
+        }
+
+        #listaPokemons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto 40px auto;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <a href="/pokedex/" style="color:white; font-weight:bold; font-size:1.2em;">Mi Pokédex</a>
+        </div>
+        <div class="links">
+            <a href="/inicio/">Inicio</a>
+            {% if request.session.usuario_rol == 'admin' %}
+                <a href="/usuarios/">Usuarios</a>
+            {% endif %}
+            <a href="/pokedex/">Pokédex</a>
+            <a href="/logout/">Cerrar sesión</a>
+        </div>
+    </nav>
+
+    <main style="padding:20px;">
+        {% block contenido %}{% endblock %}
+    </main>
+</body>
+</html>

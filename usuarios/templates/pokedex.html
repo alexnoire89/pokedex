@@ -1,0 +1,189 @@
+
+{% extends 'base.html' %}
+
+{% block titulo %}Mi Pokédex{% endblock %}
+
+{% block contenido %}
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #fceabb, #f8b500);
+        color: #333;
+        margin: 20px;
+    }
+    h1 {
+        color: #ef5350;
+        text-align: center;
+        text-shadow: 2px 2px #f8b500;
+    }
+    #listaPokemons {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+        max-width: 1000px;
+        margin: 0 auto 40px auto;
+    }
+    #cargaMensaje {
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.2em;
+        color: #ef5350;
+        text-shadow: 1px 1px #f8b500;
+        margin-bottom: 20px;
+        user-select: none;
+    }
+    .pokemon {
+        background-color: #ffffffcc;
+        border: 3px solid #ef5350;
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    .pokemon:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+    .pokemon-name {
+        font-weight: bold;
+        font-size: 1.5em;
+        color: #1e88e5;
+        margin-bottom: 10px;
+        text-align: center;
+        text-shadow: 1px 1px #ef5350;
+    }
+    .pokemon-type {
+        font-style: italic;
+        color: #ef6c00;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    .btn-pokeball {
+        background: #ef5350;
+        border: 2px solid #f8b500;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        display: block;
+        margin: 15px auto;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        transition: background 0.3s ease;
+    }
+    .btn-pokeball:hover {
+        background: #f8b500;
+        color: #ef5350;
+        border-color: #ef5350;
+    }
+    .pokemon img {
+        width: 120px;
+        height: 120px;
+        display: block;
+        margin: 0 auto 10px auto;
+    }
+    .tipo {
+        display: inline-block;
+        background-color: #eee;
+        border-radius: 4px;
+        padding: 2px 8px;
+        margin: 2px;
+        font-size: 0.8em;
+    }
+    .habilidad {
+        font-size: 0.8em;
+        color: #555;
+        text-align: center;
+    }
+</style>
+
+<h1>Mi Pokédex</h1>
+
+<div id="cargaMensaje">Scrollea para Pokecargar más!</div>
+<div id="listaPokemons"></div>
+
+<script>
+    let offset = 0;       
+    const limit = 20;     //Cuantos cargar por vez
+    const lista = document.getElementById('listaPokemons');
+    const cargaMensaje = document.getElementById('cargaMensaje');
+    let cargando = false; //doOnce para evitar multiples cargas
+    let totalPokemons = null; 
+
+    async function cargarPokemons() {
+        if (cargando) return; 
+        cargando = true;
+
+        //if (cargaMensaje) cargaMensaje.style.display = 'none';
+
+        try {
+            //traer el total de pokémon
+            if (totalPokemons === null) {
+                const responseCount = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=1`);
+                const dataCount = await responseCount.json();
+                totalPokemons = dataCount.count;
+            }
+
+            //traer lista
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
+            const data = await response.json();
+
+            //traer detalles y mostrar
+            for (const poke of data.results) {
+                const detalleResponse = await fetch(poke.url);
+                const detalle = await detalleResponse.json();
+
+                const divPoke = document.createElement('div');
+                divPoke.className = 'pokemon';
+
+                const nombre = document.createElement('h3');
+                nombre.className = 'pokemon-name';
+                nombre.textContent = detalle.name.charAt(0).toUpperCase() + detalle.name.slice(1);
+                divPoke.appendChild(nombre);
+
+                const img = document.createElement('img');
+                img.src = detalle.sprites.front_default || '';
+                img.alt = detalle.name;
+                divPoke.appendChild(img);
+
+                const tipos = document.createElement('div');
+                detalle.types.forEach(t => {
+                    const tipoSpan = document.createElement('span');
+                    tipoSpan.className = 'tipo';
+                    tipoSpan.textContent = t.type.name;
+                    tipos.appendChild(tipoSpan);
+                });
+                divPoke.appendChild(tipos);
+
+                const habilidades = document.createElement('div');
+                habilidades.className = 'habilidad';
+                habilidades.textContent = 'Habilidades: ' + detalle.abilities.map(a => a.ability.name).join(', ');
+                divPoke.appendChild(habilidades);
+
+                lista.appendChild(divPoke);
+            }
+
+            offset += limit;  
+            cargando = false;
+        } catch (error) {
+            lista.innerHTML = 'Error al cargar Pokémon.';
+            console.error(error);
+            cargando = false;
+        }
+    }
+
+    //detectar cuando llegamos casi al final de la página para cargar más
+    window.addEventListener('scroll', () => {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+            if (totalPokemons === null || offset < totalPokemons) {
+                cargarPokemons();
+            }
+        }
+    });
+
+    cargarPokemons();
+</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Usuarios{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+    <h1>Gestión de Usuarios</h1>
+
+    <a href="/usuarios/crear/" class="btn">+ Crear nuevo usuario</a>
+    <br><br>
+
+    <table class="tabla-usuarios">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.rol }}</td>
+                <td>
+                    <a class="btn" href="/usuarios/editar/{{ usuario.id }}/">Editar</a>
+                    <a class="btn" href="/usuarios/eliminar/{{ usuario.id }}/">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <a href="/inicio/" class="btn">Volver al inicio</a>
+</div>
+
+<style>
+    .tabla-usuarios {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 auto;
+        background: #fff8;
+        border: 2px solid #ef5350;
+        border-radius: 10px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+
+    .tabla-usuarios th, .tabla-usuarios td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .tabla-usuarios th {
+        background-color: #ef5350;
+        color: white;
+        font-weight: bold;
+    }
+
+    .tabla-usuarios tr:nth-child(even) {
+        background-color: #fff0f0;
+    }
+
+    .tabla-usuarios tr:hover {
+        background-color: #ffe5e5;
+    }
+
+    .tabla-usuarios a.btn {
+        padding: 6px 12px;
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}

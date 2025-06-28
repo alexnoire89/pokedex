@@ -1,0 +1,40 @@
+
+{% extends 'base.html' %}
+
+{% block titulo %}Registro{% endblock %}
+
+{% block contenido %}
+
+    <h1>Registrarse</h1>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                    <li style="color:red;">{{ message }}</li>
+                {% else %}
+                    <li style="color:green;">{{ message }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="POST">
+        {% csrf_token %}
+        <label>Nombre:</label><br>
+        <input type="text" name="nombre" required><br><br>
+
+        <label>Email:</label><br>
+        <input type="email" name="email" required><br><br>
+
+        <label>Contraseña:</label><br>
+        <input type="password" name="password" required><br><br>
+
+        <label>Confirmar contraseña:</label><br>
+        <input type="password" name="confirmar" required><br><br>
+
+        <button type="submit">Crear cuenta</button>
+    </form>
+
+    <br>
+    <a href="/login">¿Ya tenés cuenta? Iniciar sesión</a>
+{% endblock %}
+

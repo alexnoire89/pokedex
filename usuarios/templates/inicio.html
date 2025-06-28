@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Página de Inicio{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+    <h1>¡Bienvenido, {{ nombre }}!</h1>
+    <p>Tu rol es: <strong>{{ rol }}</strong></p>
+
+    {% if rol == 'admin' %}
+        <p>Podés acceder a la gestión de usuarios:</p>
+        <a class="btn" href="/usuarios/">Gestión de Usuarios</a>
+    {% endif %}
+
+    <p>Accedé a la Pokédex:</p>
+    <a class="btn" href="/pokedex/">Ver Pokédex</a>
+
+    <form action="/logout/" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn">Cerrar sesión</button>
+    </form>
+</div>
+{% endblock %}
